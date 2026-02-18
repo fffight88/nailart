@@ -233,7 +233,7 @@ export default function AetherHero({
 
       {/* Content layer */}
       <div
-        className={`relative z-[2] h-full flex items-center ${JUSTIFY_MAP[align]} p-[min(6vw,64px)] font-handwriting`}
+        className={`relative z-[2] h-full flex items-center ${JUSTIFY_MAP[align]} p-[min(6vw,64px)] font-sans`}
         style={{ color: textColor }}
       >
         {children ? (
@@ -245,7 +245,7 @@ export default function AetherHero({
             className={`w-full ${centerMargin} ${TEXT_ALIGN_MAP[align]}`}
             style={{ maxWidth }}
           >
-            <h1 className="m-0 text-[clamp(2.2rem,6vw,4.5rem)] leading-[1.04] tracking-tight font-bold [text-shadow:0_6px_36px_rgba(0,0,0,0.45)]">
+            <h1 className="m-0 text-[clamp(2.2rem,6vw,4.5rem)] leading-[1.04] tracking-tight font-bold font-handwriting [text-shadow:0_6px_36px_rgba(0,0,0,0.45)]">
               {title}
             </h1>
 
