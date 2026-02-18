@@ -10,10 +10,10 @@ export default function Navbar() {
       {/* Left: Logo + Text */}
       <a href="/" className="flex items-center gap-2.5 no-underline text-white">
         <img
-          src="/nailart.png"
+          src="/nailart_logo.png"
           alt="Nailart AI logo"
-          width={32}
-          height={32}
+          width={22}
+          height={22}
           className="object-contain"
         />
         <span className="text-lg font-bold tracking-tight">

@@ -33,10 +33,10 @@ export default function DashboardNavbar() {
         className="pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/[0.08] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.3)] no-underline transition-all duration-200 hover:bg-white/[0.1] hover:border-white/[0.14] hover:shadow-[0_6px_32px_rgba(0,0,0,0.4)]"
       >
         <img
-          src="/nailart.png"
+          src="/nailart_logo.png"
           alt="Nailart AI logo"
-          width={24}
-          height={24}
+          width={20}
+          height={20}
           className="object-contain"
         />
         <span className="text-white text-sm font-semibold tracking-tight">

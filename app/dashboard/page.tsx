@@ -38,7 +38,7 @@ export default function DashboardPage() {
     >
       <DashboardNavbar />
 
-      <main className="flex-1 flex items-center justify-center">
+      <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-12">
         <PromptArea />
       </main>
     </div>
