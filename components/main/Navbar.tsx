@@ -36,7 +36,7 @@ export default function Navbar() {
 
       {/* Right: CTA */}
       <a
-        href="#"
+        href="/auth"
         className="py-2 px-5 rounded-[10px] bg-white/12 text-white no-underline text-sm font-semibold border border-white/18 backdrop-blur-sm transition-colors duration-200 hover:bg-white/20"
       >
         Get Started
