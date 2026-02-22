@@ -4,20 +4,19 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
-import PricingModal from '@/components/dashboard/PricingModal'
-
 interface DashboardNavbarProps {
   onToggleSidebar?: () => void
+  onOpenPricing?: () => void
 }
 
-export default function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProps) {
+export default function DashboardNavbar({ onToggleSidebar, onOpenPricing }: DashboardNavbarProps) {
   const { user, signOut } = useAuth()
   const supabase = useMemo(() => createClient(), [])
   const [open, setOpen] = useState(false)
-  const [pricingOpen, setPricingOpen] = useState(false)
-  const [userPlan, setUserPlan] = useState<{ plan: string; status: string }>({
+  const [userPlan, setUserPlan] = useState<{ plan: string; status: string; credits: number }>({
     plan: 'free',
     status: 'inactive',
+    credits: 0,
   })
   const [portalLoading, setPortalLoading] = useState(false)
   const popoverRef = useRef<HTMLDivElement>(null)
@@ -38,12 +37,12 @@ export default function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProp
     if (!user) return
     supabase
       .from('users')
-      .select('plan, subscription_status')
+      .select('plan, subscription_status, credits')
       .eq('id', user.id)
       .single()
       .then(({ data }) => {
         if (data) {
-          setUserPlan({ plan: data.plan, status: data.subscription_status })
+          setUserPlan({ plan: data.plan, status: data.subscription_status, credits: data.credits ?? 0 })
         }
       })
   }, [user, supabase])
@@ -151,13 +150,38 @@ export default function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProp
                 {user?.email && (
                   <p className="text-white/40 text-xs truncate">{user.email}</p>
                 )}
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-white/35 text-xs font-medium">
+                    {userPlan.plan === 'ultra' ? 'Ultra' : userPlan.plan === 'pro' ? 'Pro' : 'Free'} Plan
+                  </span>
+                  {userPlan.status !== 'active' && userPlan.plan !== 'free' && (
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                      userPlan.status === 'canceled'
+                        ? 'bg-amber-500/15 text-amber-400/80'
+                        : userPlan.status === 'past_due'
+                          ? 'bg-red-500/15 text-red-400/80'
+                          : 'bg-white/[0.06] text-white/40'
+                    }`}>
+                      {userPlan.status}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                    <circle cx="12" cy="12" r="10" fill="#FBBF24" />
+                    <circle cx="12" cy="12" r="6" fill="#F59E0B" />
+                  </svg>
+                  <span className="text-white/35 text-xs font-medium">
+                    {userPlan.credits} credits
+                  </span>
+                </div>
               </div>
             </div>
             <div className="px-3 py-2">
               <button
                 type="button"
                 onClick={() => {
-                  setPricingOpen(true)
+                  onOpenPricing?.()
                   setOpen(false)
                 }}
                 className="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-white text-[#1e1e1e] text-sm font-semibold cursor-pointer transition-opacity hover:opacity-90"
@@ -202,7 +226,6 @@ export default function DashboardNavbar({ onToggleSidebar }: DashboardNavbarProp
       </div>
     </nav>
 
-    <PricingModal open={pricingOpen} onClose={() => setPricingOpen(false)} />
   </>
   )
 }

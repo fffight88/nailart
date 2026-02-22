@@ -140,7 +140,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-5 pt-6 pb-4 border-b border-white/[0.06]">
           <h3 className="text-white/70 text-sm font-semibold tracking-wide uppercase">
             My Thumbnails
           </h3>

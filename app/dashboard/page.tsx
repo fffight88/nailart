@@ -6,11 +6,13 @@ import { useAuth } from '@/components/providers/AuthProvider'
 import DashboardNavbar from '@/components/dashboard/DashboardNavbar'
 import PromptArea from '@/components/dashboard/PromptArea'
 import Sidebar from '@/components/dashboard/Sidebar'
+import PricingModal from '@/components/dashboard/PricingModal'
 
 export default function DashboardPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [pricingOpen, setPricingOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,13 +40,18 @@ export default function DashboardPage() {
         backgroundSize: '48px 48px',
       }}
     >
-      <DashboardNavbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
+      <DashboardNavbar
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        onOpenPricing={() => setPricingOpen(true)}
+      />
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 lg:ml-72 transition-[margin] duration-300">
-        <PromptArea />
+        <PromptArea onOpenPricing={() => setPricingOpen(true)} />
       </main>
+
+      <PricingModal open={pricingOpen} onClose={() => setPricingOpen(false)} />
     </div>
   )
 }

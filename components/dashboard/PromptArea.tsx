@@ -27,7 +27,11 @@ const PLACEHOLDERS = [
   'Shocking reaction face with bold text...',
 ]
 
-export default function PromptArea() {
+interface PromptAreaProps {
+  onOpenPricing?: () => void
+}
+
+export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
   const { user } = useAuth()
   const [value, setValue] = useState('')
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
@@ -236,6 +240,10 @@ export default function PromptArea() {
         const data = await response.json()
 
         if (!response.ok) {
+          if (response.status === 402) {
+            onOpenPricing?.()
+            return
+          }
           throw new Error(data.error || 'Generation failed')
         }
 

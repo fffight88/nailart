@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { genai } from '@/lib/gemini'
 import { THUMBNAIL_SYSTEM_PROMPT } from '@/lib/system-prompt'
 
 export const maxDuration = 60
 
 export async function POST(request: Request) {
+  let creditDeducted = false
+  let userId: string | undefined
+
   try {
     const supabase = await createClient()
     const {
@@ -52,6 +56,22 @@ export async function POST(request: Request) {
       }
     }
 
+    // Deduct 1 credit (atomic: checks >= 1 and decrements)
+    const admin = createAdminClient()
+    const { data: creditUsed, error: creditError } = await admin.rpc('use_credit', {
+      uid: user.id,
+    })
+
+    if (creditError || !creditUsed) {
+      return NextResponse.json(
+        { error: 'Insufficient credits' },
+        { status: 402 }
+      )
+    }
+
+    creditDeducted = true
+    userId = user.id
+
     // Insert thumbnail record
     const { data: thumbnail, error: insertError } = await supabase
       .from('thumbnails')
@@ -65,6 +85,7 @@ export async function POST(request: Request) {
 
     if (insertError || !thumbnail) {
       console.error('Insert error:', insertError)
+      await admin.rpc('increment_credits', { uid: user.id, amount: 1 })
       return NextResponse.json(
         { error: 'Failed to create thumbnail record' },
         { status: 500 }
@@ -138,6 +159,7 @@ export async function POST(request: Request) {
         .update({ status: 'failed' })
         .eq('id', thumbnail.id)
 
+      await admin.rpc('increment_credits', { uid: user.id, amount: 1 })
       console.error('All attempts failed:', lastError)
       return NextResponse.json(
         { error: 'Image generation failed. Please try again.' },
@@ -161,6 +183,7 @@ export async function POST(request: Request) {
         .update({ status: 'failed' })
         .eq('id', thumbnail.id)
 
+      await admin.rpc('increment_credits', { uid: user.id, amount: 1 })
       console.error('Upload error:', uploadError)
       return NextResponse.json(
         { error: 'Failed to save generated image' },
@@ -186,6 +209,7 @@ export async function POST(request: Request) {
       .single()
 
     if (updateError) {
+      await admin.rpc('increment_credits', { uid: user.id, amount: 1 })
       console.error('Update error:', updateError)
       return NextResponse.json(
         { error: 'Failed to update thumbnail record' },
@@ -195,6 +219,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ thumbnail: updatedThumbnail })
   } catch (error) {
+    if (creditDeducted && userId) {
+      const admin = createAdminClient()
+      await admin.rpc('increment_credits', { uid: userId, amount: 1 })
+    }
     console.error('Unexpected error:', error)
     return NextResponse.json(
       { error: 'An unexpected error occurred' },

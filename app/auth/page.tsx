@@ -78,6 +78,13 @@ export default function AuthPage() {
                 <GoogleIcon />
                 Continue with Google
               </button>
+
+              <p className="text-white/25 text-xs text-center">
+                By signing in, you agree to our{' '}
+                <a href="/terms" className="text-white/40 underline underline-offset-2 transition-colors hover:text-white/60">Terms</a>
+                {' '}and{' '}
+                <a href="/privacy" className="text-white/40 underline underline-offset-2 transition-colors hover:text-white/60">Privacy Policy</a>
+              </p>
             </div>
           </div>
         </div>
