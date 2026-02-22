@@ -1,14 +1,16 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/providers/AuthProvider'
 import DashboardNavbar from '@/components/dashboard/DashboardNavbar'
 import PromptArea from '@/components/dashboard/PromptArea'
+import Sidebar from '@/components/dashboard/Sidebar'
 
 export default function DashboardPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -36,9 +38,11 @@ export default function DashboardPage() {
         backgroundSize: '48px 48px',
       }}
     >
-      <DashboardNavbar />
+      <DashboardNavbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
 
-      <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-12">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <main className="flex-1 flex flex-col items-center justify-center pt-24 pb-12 lg:ml-72 transition-[margin] duration-300">
         <PromptArea />
       </main>
     </div>

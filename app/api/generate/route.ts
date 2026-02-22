@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { genai, THUMBNAIL_SYSTEM_PROMPT } from '@/lib/gemini'
+import { genai } from '@/lib/gemini'
+import { THUMBNAIL_SYSTEM_PROMPT } from '@/lib/system-prompt'
 
 export const maxDuration = 60
 
@@ -31,6 +32,24 @@ export async function POST(request: Request) {
         { error: 'Prompt must be under 1000 characters' },
         { status: 400 }
       )
+    }
+
+    // Validate attached images (max 10, each max 5MB base64 ≈ 6.67MB encoded)
+    const images: { data: string; mimeType: string }[] = body.images || []
+    if (images.length > 10) {
+      return NextResponse.json(
+        { error: 'Maximum 10 images allowed' },
+        { status: 400 }
+      )
+    }
+    for (const img of images) {
+      const sizeBytes = (img.data.length * 3) / 4
+      if (sizeBytes > 5 * 1024 * 1024) {
+        return NextResponse.json(
+          { error: 'Each image must be under 5MB' },
+          { status: 400 }
+        )
+      }
     }
 
     // Insert thumbnail record
@@ -65,9 +84,17 @@ export async function POST(request: Request) {
       for (let attempt = 1; attempt <= model.retries; attempt++) {
         try {
           console.log(`Trying ${model.id} (attempt ${attempt}/${model.retries})`)
+          // Build contents: text prompt + optional image parts
+          const contentParts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[] = [
+            { text: `${THUMBNAIL_SYSTEM_PROMPT} ${prompt}` },
+            ...images.map((img) => ({
+              inlineData: { mimeType: img.mimeType, data: img.data },
+            })),
+          ]
+
           const response = await genai.models.generateContent({
             model: model.id,
-            contents: `${THUMBNAIL_SYSTEM_PROMPT} ${prompt}`,
+            contents: contentParts,
             config: {
               responseModalities: ['TEXT', 'IMAGE'],
               imageConfig: {

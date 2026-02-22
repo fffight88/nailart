@@ -1,9 +1,23 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { createPortal } from 'react-dom'
+import Image from 'next/image'
 import { BorderBeam } from '@/components/ui/border-beam'
 import { Component as GeneratingLoader } from '@/components/ui/quantum-pulse-loade'
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/components/providers/AuthProvider'
 import type { Thumbnail } from '@/lib/types'
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_ATTACHMENTS = 10
+
+interface Attachment {
+  id: string
+  url: string        // object URL (local file) or image_url (existing thumbnail)
+  file?: File        // present for local uploads
+  name: string
+}
 
 const PLACEHOLDERS = [
   'A cat wearing sunglasses on a neon background...',
@@ -14,6 +28,7 @@ const PLACEHOLDERS = [
 ]
 
 export default function PromptArea() {
+  const { user } = useAuth()
   const [value, setValue] = useState('')
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
   const [displayedPlaceholder, setDisplayedPlaceholder] = useState('')
@@ -21,8 +36,62 @@ export default function PromptArea() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<Thumbnail | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [existingThumbnails, setExistingThumbnails] = useState<Thumbnail[]>([])
+  const [showExistingPopover, setShowExistingPopover] = useState(false)
+  const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const existingBtnRef = useRef<HTMLButtonElement>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
+  const supabase = useMemo(() => createClient(), [])
+
+  // Fetch user's existing thumbnails for the popover
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+
+    async function load() {
+      const { data } = await supabase
+        .from('thumbnails')
+        .select('*')
+        .eq('user_id', user!.id)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+      if (!cancelled && data) {
+        setExistingThumbnails(data as Thumbnail[])
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [user, supabase])
+
+  // Close popover on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node
+      const inBtn = existingBtnRef.current?.contains(target)
+      const inPopover = popoverRef.current?.contains(target)
+      if (!inBtn && !inPopover) {
+        setShowExistingPopover(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  // Calculate popover position from button
+  const openPopover = useCallback(() => {
+    if (existingBtnRef.current) {
+      const rect = existingBtnRef.current.getBoundingClientRect()
+      setPopoverPos({ x: rect.left, y: rect.top })
+    }
+    setShowExistingPopover(true)
+  }, [])
 
   // Typewriter effect for placeholder
   useEffect(() => {
@@ -56,8 +125,74 @@ export default function PromptArea() {
     }
   }, [placeholderIndex, isTyping])
 
+  const addFiles = useCallback((files: FileList | File[]) => {
+    const fileArr = Array.from(files)
+    const errors: string[] = []
+
+    const validFiles = fileArr.filter((f) => {
+      if (!f.type.startsWith('image/')) {
+        errors.push(`${f.name}: not an image`)
+        return false
+      }
+      if (f.size > MAX_FILE_SIZE) {
+        errors.push(`${f.name}: exceeds 5MB`)
+        return false
+      }
+      return true
+    })
+
+    setAttachments((prev) => {
+      const remaining = MAX_ATTACHMENTS - prev.length
+      if (remaining <= 0) {
+        errors.push(`Maximum ${MAX_ATTACHMENTS} attachments reached`)
+        return prev
+      }
+      const toAdd = validFiles.slice(0, remaining)
+      return [
+        ...prev,
+        ...toAdd.map((f) => ({
+          id: crypto.randomUUID(),
+          url: URL.createObjectURL(f),
+          file: f,
+          name: f.name,
+        })),
+      ]
+    })
+
+    if (errors.length > 0) {
+      setError(errors.join('. '))
+      setTimeout(() => setError(null), 4000)
+    }
+  }, [])
+
+  const attachExistingThumbnail = useCallback((thumb: Thumbnail) => {
+    if (!thumb.image_url) return
+
+    setAttachments((prev) => {
+      if (prev.length >= MAX_ATTACHMENTS) return prev
+      if (prev.some((a) => a.id === thumb.id)) return prev
+      return [
+        ...prev,
+        {
+          id: thumb.id,
+          url: thumb.image_url!,
+          name: thumb.prompt.slice(0, 30),
+        },
+      ]
+    })
+    setShowExistingPopover(false)
+  }, [])
+
+  const removeAttachment = useCallback((id: string) => {
+    setAttachments((prev) => {
+      const removed = prev.find((a) => a.id === id)
+      if (removed?.file) URL.revokeObjectURL(removed.url)
+      return prev.filter((a) => a.id !== id)
+    })
+  }, [])
+
   const handleSubmit = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
+    async (e: React.SyntheticEvent) => {
       e.preventDefault()
       if (!value.trim() || isGenerating) return
 
@@ -66,10 +201,36 @@ export default function PromptArea() {
       setResult(null)
 
       try {
+        // Build request body
+        const images: { data: string; mimeType: string }[] = []
+
+        for (const att of attachments) {
+          if (att.file) {
+            // Local file → base64
+            const buffer = await att.file.arrayBuffer()
+            const base64 = btoa(
+              new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), '')
+            )
+            images.push({ data: base64, mimeType: att.file.type })
+          } else {
+            // Existing thumbnail URL → fetch and convert
+            const res = await fetch(att.url)
+            const blob = await res.blob()
+            const buffer = await blob.arrayBuffer()
+            const base64 = btoa(
+              new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), '')
+            )
+            images.push({ data: base64, mimeType: blob.type || 'image/png' })
+          }
+        }
+
         const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: value.trim() }),
+          body: JSON.stringify({
+            prompt: value.trim(),
+            ...(images.length > 0 && { images }),
+          }),
         })
 
         const data = await response.json()
@@ -80,6 +241,7 @@ export default function PromptArea() {
 
         setResult(data.thumbnail)
         setValue('')
+        setAttachments([])
         if (textareaRef.current) {
           textareaRef.current.style.height = 'auto'
         }
@@ -91,7 +253,7 @@ export default function PromptArea() {
         setIsGenerating(false)
       }
     },
-    [value, isGenerating]
+    [value, isGenerating, attachments]
   )
 
   const handleRetry = useCallback(() => {
@@ -122,11 +284,15 @@ export default function PromptArea() {
       {hasResult && (
         <div className="mb-8 w-full max-w-2xl">
           <div className="rounded-2xl overflow-hidden bg-white/[0.04] border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
-            <img
-              src={result.image_url!}
-              alt={result.prompt}
-              className="w-full aspect-video object-cover"
-            />
+            <div className="relative aspect-video">
+              <Image
+                src={result.image_url!}
+                alt={result.prompt}
+                fill
+                sizes="(max-width: 672px) 100vw, 672px"
+                className="object-cover"
+              />
+            </div>
             <div className="p-4">
               <p className="text-white/50 text-sm truncate">{result.prompt}</p>
               <div className="flex items-center gap-3 mt-3">
@@ -146,10 +312,9 @@ export default function PromptArea() {
       )}
 
       {/* Error display — above the prompt */}
-      {hasError && (
+      {hasError && !isGenerating && (
         <div className="mb-8 w-full max-w-2xl">
           <div className="flex flex-col items-center gap-5 py-12 px-6 rounded-2xl bg-white/[0.04] border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
-            {/* Red circle X icon */}
             <div className="w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -158,6 +323,7 @@ export default function PromptArea() {
             </div>
             <p className="text-white text-lg font-semibold">Generation Failed</p>
             <button
+              type="button"
               onClick={handleRetry}
               className="px-6 py-2.5 rounded-xl bg-white/10 border border-white/[0.08] text-white text-sm font-medium cursor-pointer transition-colors hover:bg-white/15"
             >
@@ -168,7 +334,39 @@ export default function PromptArea() {
       )}
 
       {/* Prompt form */}
-      <form onSubmit={handleSubmit} className="relative w-full max-w-2xl rounded-2xl bg-white/[0.06] border border-white/[0.1] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] overflow-hidden transition-all duration-200 focus-within:border-white/20 focus-within:shadow-[0_4px_32px_rgba(0,0,0,0.3)] focus-within:bg-white/[0.08]">
+      <form onSubmit={handleSubmit} className="relative w-full max-w-2xl rounded-2xl bg-white/[0.06] border border-white/[0.1] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] transition-all duration-200 focus-within:border-white/20 focus-within:shadow-[0_4px_32px_rgba(0,0,0,0.3)] focus-within:bg-white/[0.08]">
+        {/* Attachment previews */}
+        {attachments.length > 0 && (
+          <div className="flex gap-2 px-4 pt-4 pb-1 overflow-x-auto scrollbar-thin">
+            {attachments.map((att) => (
+              <div key={att.id} className="relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-white/[0.1] group/att">
+                <Image
+                  src={att.url}
+                  alt={att.name}
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                  unoptimized={!!att.file}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(att.id)}
+                  aria-label="Remove attachment"
+                  className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 text-white/80 flex items-center justify-center opacity-0 group-hover/att:opacity-100 transition-opacity cursor-pointer"
+                >
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+            <span className="self-center text-white/20 text-xs shrink-0">
+              {attachments.length}/{MAX_ATTACHMENTS}
+            </span>
+          </div>
+        )}
+
         {/* Input */}
         <textarea
           ref={textareaRef}
@@ -195,20 +393,93 @@ export default function PromptArea() {
 
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 pb-3">
-          {/* Left: attachment + mic */}
+          {/* Left: existing thumbnails + attachment + mic */}
           <div className="flex items-center gap-1">
+            {/* Existing thumbnails button */}
             <button
+              ref={existingBtnRef}
               type="button"
               disabled={isGenerating}
+              onMouseEnter={openPopover}
+              onClick={openPopover}
+              title="My thumbnails"
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-white/35 cursor-pointer transition-colors hover:text-white/70 hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              {/* Grid/gallery icon */}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+              </svg>
+            </button>
+
+            {/* Existing thumbnails popover — portaled to body to escape backdrop-blur containing block */}
+            {showExistingPopover && existingThumbnails.length > 0 && popoverPos && createPortal(
+              <div
+                ref={popoverRef}
+                style={{ left: popoverPos.x, top: popoverPos.y }}
+                className="fixed -translate-y-full -mt-2 w-80 max-h-96 overflow-y-auto rounded-xl bg-[#232323] border border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.5)] p-3 scrollbar-thin z-[9999]"
+                onMouseLeave={() => setShowExistingPopover(false)}
+              >
+                <p className="px-2 py-1.5 text-white/40 text-xs font-semibold uppercase tracking-wide">
+                  Attach existing
+                </p>
+                <div className="grid grid-cols-3 gap-2 mt-1.5">
+                  {existingThumbnails.map((thumb) => (
+                    <button
+                      key={thumb.id}
+                      type="button"
+                      onClick={() => attachExistingThumbnail(thumb)}
+                      disabled={attachments.some((a) => a.id === thumb.id)}
+                      className="relative aspect-video rounded-lg overflow-hidden border border-white/[0.06] cursor-pointer transition-all hover:border-white/[0.2] hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      {thumb.image_url && (
+                        <Image
+                          src={thumb.image_url}
+                          alt={thumb.prompt}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>,
+              document.body,
+            )}
+
+            {/* File attachment button */}
+            <button
+              type="button"
+              disabled={isGenerating || attachments.length >= MAX_ATTACHMENTS}
+              onClick={() => fileInputRef.current?.click()}
+              title="Attach images"
               className="w-9 h-9 rounded-lg flex items-center justify-center text-white/35 cursor-pointer transition-colors hover:text-white/70 hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
               </svg>
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              aria-label="Upload images"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files) addFiles(e.target.files)
+                e.target.value = ''
+              }}
+            />
+
+            {/* Mic button */}
             <button
               type="button"
               disabled={isGenerating}
+              title="Voice input"
               className="w-9 h-9 rounded-lg flex items-center justify-center text-white/35 cursor-pointer transition-colors hover:text-white/70 hover:bg-white/[0.06] disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
