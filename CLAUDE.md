@@ -1,7 +1,7 @@
 # NailArt — Project Guide
 
 ## Service Overview
-- AI-powered YouTube thumbnail generator for Korean creators
+- AI-powered YouTube thumbnail generator
 - Gemini API: `gemini-3-pro-image-preview` (primary, 2K) / `gemini-2.5-flash-image` (fallback with retry)
 - Stack: Next.js 16, React 19, Tailwind v4, Supabase (Auth / DB / Storage)
 
@@ -20,15 +20,14 @@
 | `lib/supabase/server.ts` | Server-side Supabase client with cookie management |
 
 ## System Prompt Rules (`lib/system-prompt.ts`)
-- Target audience: **Korean YouTube viewers (ko-KR)**
 - Default: NO text in generated images
-- Text allowed only when user **explicitly requests** it → render in Korean by default
+- Text allowed only when user **explicitly requests** it → render in English by default, other languages only when specified
 - 16:9 aspect ratio, bold high-contrast colors (2-3 max)
 - Rule of thirds composition, clear focal point readable at 168x94px
 - Based on: Nano Banana prompting guide + YouTube thumbnail best practices
 
 ## Conventions
-- Korean user prompts are expected; system prompt is written in English
+- User prompts can be in any language; system prompt is written in English
 - `quantum-pulse-loade.tsx` filename has typo (missing 'r') — known, not breaking
 - Use `next/image` for all images; remote patterns configured in `next.config.ts`
 - Supabase browser client: always memoize with `useMemo(() => createClient(), [])`

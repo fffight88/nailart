@@ -6,6 +6,17 @@ import { THUMBNAIL_SYSTEM_PROMPT } from '@/lib/system-prompt'
 
 export const maxDuration = 60
 
+const GEMINI_TIMEOUT_MS = 45_000 // 45 seconds per attempt
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(message)), ms)
+    ),
+  ])
+}
+
 export async function POST(request: Request) {
   let creditDeducted = false
   let userId: string | undefined
@@ -113,17 +124,21 @@ export async function POST(request: Request) {
             })),
           ]
 
-          const response = await genai.models.generateContent({
-            model: model.id,
-            contents: contentParts,
-            config: {
-              responseModalities: ['TEXT', 'IMAGE'],
-              imageConfig: {
-                aspectRatio: '16:9',
-                ...(model.imageSize && { imageSize: model.imageSize }),
+          const response = await withTimeout(
+            genai.models.generateContent({
+              model: model.id,
+              contents: contentParts,
+              config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+                imageConfig: {
+                  aspectRatio: '16:9',
+                  ...(model.imageSize && { imageSize: model.imageSize }),
+                },
               },
-            },
-          })
+            }),
+            GEMINI_TIMEOUT_MS,
+            `${model.id} timed out after ${GEMINI_TIMEOUT_MS / 1000}s`
+          )
 
           const parts = response.candidates?.[0]?.content?.parts
           const imagePart = parts?.find(

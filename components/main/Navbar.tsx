@@ -1,46 +1,93 @@
+'use client'
+
+import { useState } from 'react'
+
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Contact', href: '#contact' },
-];
+]
 
 export default function Navbar() {
-  return (
-    <nav className="fixed top-0 inset-x-0 z-[100] flex items-center justify-between px-8 h-16 bg-black/40 backdrop-blur-[12px] backdrop-saturate-[120%] border-b border-white/[0.08] font-sans text-white">
-      {/* Left: Logo + Text */}
-      <a href="/" className="flex items-center gap-2.5 no-underline text-white">
-        <img
-          src="/nailart_logo.png"
-          alt="Nailart AI logo"
-          width={22}
-          height={22}
-          className="object-contain"
-        />
-        <span className="text-lg font-bold tracking-tight">
-          Nailart AI
-        </span>
-      </a>
+  const [menuOpen, setMenuOpen] = useState(false)
 
-      {/* Center: Nav links */}
-      <div className="flex gap-8">
-        {NAV_LINKS.map((link) => (
+  return (
+    <nav className="fixed top-0 inset-x-0 z-[100] bg-black/40 backdrop-blur-[12px] backdrop-saturate-[120%] border-b border-white/[0.08] font-sans text-white">
+      <div className="flex items-center justify-between px-8 h-16">
+        {/* Left: Logo */}
+        <a href="/" className="flex items-center gap-2.5 no-underline text-white">
+          <img
+            src="/nailart_logo.png"
+            alt="Nailart AI logo"
+            width={22}
+            height={22}
+            className="object-contain"
+          />
+          <span className="text-lg font-bold tracking-tight">
+            Nailart AI
+          </span>
+        </a>
+
+        {/* Center: Desktop nav links */}
+        <div className="hidden md:flex gap-8">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-white/75 no-underline text-sm font-medium transition-colors duration-200 hover:text-white"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        {/* Right: CTA + Hamburger */}
+        <div className="flex items-center gap-3">
           <a
-            key={link.href}
-            href={link.href}
-            className="text-white/75 no-underline text-sm font-medium transition-colors duration-200 hover:text-white"
+            href="/auth"
+            className="py-2 px-5 rounded-[10px] bg-white/12 text-white no-underline text-sm font-semibold border border-white/18 backdrop-blur-sm transition-colors duration-200 hover:bg-white/20"
           >
-            {link.label}
+            Get Started
           </a>
-        ))}
+
+          {/* Hamburger - mobile only */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-white/70 transition-colors hover:text-white hover:bg-white/[0.06] cursor-pointer"
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="4" y1="6" x2="20" y2="6" />
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <line x1="4" y1="18" x2="20" y2="18" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Right: CTA */}
-      <a
-        href="/auth"
-        className="py-2 px-5 rounded-[10px] bg-white/12 text-white no-underline text-sm font-semibold border border-white/18 backdrop-blur-sm transition-colors duration-200 hover:bg-white/20"
-      >
-        Get Started
-      </a>
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div className="md:hidden border-t border-white/[0.06] px-8 py-4 flex flex-col gap-3">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              className="text-white/75 no-underline text-sm font-medium py-2 transition-colors duration-200 hover:text-white"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+      )}
     </nav>
-  );
+  )
 }

@@ -43,9 +43,9 @@ export default function AuthPage() {
     <>
       <BackButton />
       <AetherHero maxWidth={99999}>
-        <div className="flex w-full h-[calc(100vh-128px)]">
-          {/* Left: 3/5 — dark overlay with video + branding */}
-          <div className="w-3/5 bg-black/60 backdrop-blur-sm rounded-2xl flex flex-col justify-between p-10 mr-6 overflow-hidden">
+        <div className="flex flex-col md:flex-row w-full h-[calc(100vh-128px)]">
+          {/* Left (desktop) / Top (mobile): branding */}
+          <div className="hidden md:flex w-3/5 bg-black/60 backdrop-blur-sm rounded-2xl flex-col justify-between p-10 mr-6 overflow-hidden">
             {/* YouTube video */}
             <div className="aspect-video w-full rounded-xl overflow-hidden bg-black/40 border border-white/10">
               <iframe
@@ -57,14 +57,42 @@ export default function AuthPage() {
               />
             </div>
 
-            {/* NAILART oversized display text */}
             <h1 className="text-[clamp(4rem,10vw,10rem)] font-black text-white tracking-tighter leading-none select-none mt-auto">
               NAILART
             </h1>
           </div>
 
-          {/* Right: 2/5 — login card */}
-          <div className="w-2/5 flex items-center justify-center">
+          {/* Mobile: NAILART text + login card stacked */}
+          <div className="flex md:hidden flex-col items-center justify-center flex-1 px-6 gap-8">
+            <h1 className="text-6xl font-black text-white tracking-tighter leading-none select-none">
+              NAILART
+            </h1>
+
+            <div className="w-full max-w-sm bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-8 flex flex-col items-center gap-5 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+              <h2 className="text-xl font-bold text-white">Welcome Back</h2>
+              <p className="text-white/60 text-center text-sm leading-relaxed">
+                Sign in to create amazing thumbnails
+              </p>
+
+              <button
+                onClick={handleGoogleSignIn}
+                className="w-full flex items-center justify-center gap-3 py-3 px-6 rounded-xl bg-white text-gray-800 font-semibold text-sm cursor-pointer transition-all duration-200 hover:bg-white/90 hover:shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
+              >
+                <GoogleIcon />
+                Continue with Google
+              </button>
+
+              <p className="text-white/25 text-xs text-center">
+                By continuing, you agree to our{' '}
+                <a href="/terms" className="text-white/40 underline underline-offset-2 transition-colors hover:text-white/60">Terms of Service</a>
+                {' '}and{' '}
+                <a href="/privacy" className="text-white/40 underline underline-offset-2 transition-colors hover:text-white/60">Privacy Policy</a>
+              </p>
+            </div>
+          </div>
+
+          {/* Right (desktop only): login card */}
+          <div className="hidden md:flex w-2/5 items-center justify-center">
             <div className="w-full max-w-sm bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-10 flex flex-col items-center gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
               <h2 className="text-2xl font-bold text-white">Welcome</h2>
               <p className="text-white/60 text-center text-sm leading-relaxed">

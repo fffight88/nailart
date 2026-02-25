@@ -228,6 +228,9 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
           }
         }
 
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 55_000)
+
         const response = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -235,7 +238,10 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
             prompt: value.trim(),
             ...(images.length > 0 && { images }),
           }),
+          signal: controller.signal,
         })
+
+        clearTimeout(timeoutId)
 
         const data = await response.json()
 
@@ -255,7 +261,9 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
         }
       } catch (err: unknown) {
         const message =
-          err instanceof Error ? err.message : 'Something went wrong'
+          err instanceof DOMException && err.name === 'AbortError'
+            ? 'Generation timed out. Please try again.'
+            : err instanceof Error ? err.message : 'Something went wrong'
         setError(message)
       } finally {
         setIsGenerating(false)
@@ -342,7 +350,7 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
       )}
 
       {/* Prompt form */}
-      <form onSubmit={handleSubmit} className="relative w-full max-w-2xl rounded-2xl bg-white/[0.06] border border-white/[0.1] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] transition-all duration-200 focus-within:border-white/20 focus-within:shadow-[0_4px_32px_rgba(0,0,0,0.3)] focus-within:bg-white/[0.08]">
+      <form onSubmit={handleSubmit} className="relative w-full max-w-2xl rounded-2xl overflow-hidden bg-white/[0.06] border border-white/[0.1] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] transition-all duration-200 focus-within:border-white/20 focus-within:shadow-[0_4px_32px_rgba(0,0,0,0.3)] focus-within:bg-white/[0.08]">
         {/* Attachment previews */}
         {attachments.length > 0 && (
           <div className="flex gap-2 px-4 pt-4 pb-1 overflow-x-auto scrollbar-thin">
