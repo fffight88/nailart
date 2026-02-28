@@ -6,7 +6,7 @@ import { THUMBNAIL_SYSTEM_PROMPT } from '@/lib/system-prompt'
 
 export const maxDuration = 60
 
-const GEMINI_TIMEOUT_MS = 45_000 // 45 seconds per attempt
+const GEMINI_TIMEOUT_MS = 60_000 // 60 seconds per attempt
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   return Promise.race([
@@ -103,69 +103,69 @@ export async function POST(request: Request) {
       )
     }
 
-    // Call Gemini API: try 3-pro first, fallback to 2.5-flash (each with retry)
+    // Call Gemini API: try 3.1-flash twice (with 5s gap), then fallback to 2.5-flash
     const MODELS = [
-      { id: 'gemini-3-pro-image-preview', imageSize: '2K', retries: 1 },
-      { id: 'gemini-2.5-flash-image', imageSize: undefined, retries: 2 },
+      { id: 'gemini-3.1-flash-image-preview', imageSize: '2K', delayAfter: 5000 },
+      { id: 'gemini-3.1-flash-image-preview', imageSize: '2K', delayAfter: 5000 },
+      { id: 'gemini-2.5-flash-image', imageSize: undefined, delayAfter: 0 },
     ] as const
 
     let imageBuffer: Buffer | null = null
     let lastError: unknown
 
-    for (const model of MODELS) {
-      for (let attempt = 1; attempt <= model.retries; attempt++) {
-        try {
-          console.log(`Trying ${model.id} (attempt ${attempt}/${model.retries})`)
-          // Build contents: text prompt + optional image parts
-          const contentParts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[] = [
-            { text: `${THUMBNAIL_SYSTEM_PROMPT} ${prompt}` },
-            ...images.map((img) => ({
-              inlineData: { mimeType: img.mimeType, data: img.data },
-            })),
-          ]
+    for (let i = 0; i < MODELS.length; i++) {
+      const model = MODELS[i]
+      try {
+        console.log(`Trying ${model.id} (attempt ${i + 1}/${MODELS.length})`)
+        // Build contents: text prompt + optional image parts
+        const contentParts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[] = [
+          { text: `${THUMBNAIL_SYSTEM_PROMPT} ${prompt}` },
+          ...images.map((img) => ({
+            inlineData: { mimeType: img.mimeType, data: img.data },
+          })),
+        ]
 
-          const response = await withTimeout(
-            genai.models.generateContent({
-              model: model.id,
-              contents: contentParts,
-              config: {
-                responseModalities: ['TEXT', 'IMAGE'],
-                imageConfig: {
-                  aspectRatio: '16:9',
-                  ...(model.imageSize && { imageSize: model.imageSize }),
-                },
+        const response = await withTimeout(
+          genai.models.generateContent({
+            model: model.id,
+            contents: contentParts,
+            config: {
+              responseModalities: ['TEXT', 'IMAGE'],
+              imageConfig: {
+                aspectRatio: '16:9',
+                ...(model.imageSize && { imageSize: model.imageSize }),
               },
-            }),
-            GEMINI_TIMEOUT_MS,
-            `${model.id} timed out after ${GEMINI_TIMEOUT_MS / 1000}s`
+            },
+          }),
+          GEMINI_TIMEOUT_MS,
+          `${model.id} timed out after ${GEMINI_TIMEOUT_MS / 1000}s`
+        )
+
+        const parts = response.candidates?.[0]?.content?.parts
+        const imagePart = parts?.find(
+          (part) => part.inlineData?.mimeType?.startsWith('image/')
+        )
+
+        if (!imagePart?.inlineData?.data) {
+          const textPart = parts?.find((p) => p.text)
+          throw new Error(
+            textPart?.text
+              ? `No image returned. Model said: ${textPart.text.slice(0, 200)}`
+              : 'No image returned from Gemini'
           )
+        }
 
-          const parts = response.candidates?.[0]?.content?.parts
-          const imagePart = parts?.find(
-            (part) => part.inlineData?.mimeType?.startsWith('image/')
-          )
-
-          if (!imagePart?.inlineData?.data) {
-            const textPart = parts?.find((p) => p.text)
-            throw new Error(
-              textPart?.text
-                ? `No image returned. Model said: ${textPart.text.slice(0, 200)}`
-                : 'No image returned from Gemini'
-            )
-          }
-
-          imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')
-          console.log(`Success with ${model.id}`)
-          break
-        } catch (err) {
-          console.error(`${model.id} attempt ${attempt} failed:`, err)
-          lastError = err
-          if (attempt < model.retries) {
-            await new Promise((r) => setTimeout(r, 1000))
-          }
+        imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')
+        console.log(`Success with ${model.id}`)
+        break
+      } catch (err) {
+        console.error(`${model.id} attempt ${i + 1} failed:`, err)
+        lastError = err
+        if (model.delayAfter > 0) {
+          console.log(`Waiting ${model.delayAfter / 1000}s before next attempt...`)
+          await new Promise((r) => setTimeout(r, model.delayAfter))
         }
       }
-      if (imageBuffer) break
     }
 
     if (!imageBuffer) {

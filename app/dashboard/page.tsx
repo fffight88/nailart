@@ -22,8 +22,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#181818' }}>
-        <div className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground/80 rounded-full animate-spin" />
       </div>
     )
   }
@@ -32,13 +32,7 @@ export default function DashboardPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col"
-      style={{
-        backgroundColor: '#181818',
-        backgroundImage:
-          'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
-        backgroundSize: '48px 48px',
-      }}
+      className="min-h-screen flex flex-col bg-background dashboard-grid"
     >
       <DashboardNavbar
         onToggleSidebar={() => setSidebarOpen((v) => !v)}

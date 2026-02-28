@@ -18,8 +18,8 @@ export default function PrivacyPage() {
       <nav className="flex items-center justify-between px-8 h-16 border-b border-white/[0.06]">
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Image
-            src="/nailart_logo.png"
-            alt="Nailart AI logo"
+            src="/grimbang_logo_dark.png"
+            alt="Grimbang logo"
             width={30}
             height={30}
             className="object-contain"
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
             <h2 className="text-white/80 text-lg font-semibold mb-3">1. Information We Collect</h2>
             <div className="text-white/40 text-sm leading-relaxed space-y-3">
               <p>
-                When you use NailArt, we collect information necessary to provide and improve our service:
+                When you use Grimbang, we collect information necessary to provide and improve our service:
               </p>
               <ul className="list-disc pl-5 space-y-1.5">
                 <li><strong className="text-white/50">Account Information:</strong> Name, email address, and profile picture from your Google account when you sign in.</li>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-white/80 text-lg font-semibold mb-3">4. Third-Party Services</h2>
             <div className="text-white/40 text-sm leading-relaxed space-y-3">
-              <p>We use the following third-party services to operate NailArt:</p>
+              <p>We use the following third-party services to operate Grimbang:</p>
               <ul className="list-disc pl-5 space-y-1.5">
                 <li><strong className="text-white/50">Google (Gemini API):</strong> For AI-powered thumbnail generation. Prompts and attached images are sent to Google&apos;s API for processing.</li>
                 <li><strong className="text-white/50">Supabase:</strong> For authentication, database, and file storage.</li>
@@ -137,8 +137,8 @@ export default function PrivacyPage() {
             <div className="text-white/40 text-sm leading-relaxed">
               <p>
                 If you have any questions about this Privacy Policy, please contact us at{' '}
-                <a href="mailto:support@nailart.ai" className="text-white/60 underline underline-offset-2 transition-colors hover:text-white/80">
-                  support@nailart.ai
+                <a href="mailto:support@grimbang.com" className="text-white/60 underline underline-offset-2 transition-colors hover:text-white/80">
+                  support@grimbang.com
                 </a>
               </p>
             </div>

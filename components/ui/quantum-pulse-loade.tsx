@@ -10,22 +10,22 @@ export const Component = () => {
           0% {
             opacity: 0;
             transform: translateY(30px) rotateX(-90deg);
-            text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+            text-shadow: 0 0 0px rgba(150, 150, 150, 0);
           }
           10% {
             opacity: 1;
             transform: translateY(0) rotateX(0deg);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 15px rgba(150, 150, 150, 0.6);
           }
           30% {
             opacity: 1;
             transform: translateY(0) rotateX(0deg);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 15px rgba(150, 150, 150, 0.6);
           }
           50% {
             opacity: 0;
             transform: translateY(-30px) rotateX(90deg);
-            text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+            text-shadow: 0 0 0px rgba(150, 150, 150, 0);
           }
           100% {
             opacity: 0;
@@ -38,7 +38,7 @@ export const Component = () => {
         }
       `}} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 36, perspective: 900 }}>
-        <div style={{ display: 'flex', gap: 3, fontSize: 48, fontWeight: 700, letterSpacing: '0.04em', color: 'white' }}>
+        <div style={{ display: 'flex', gap: 3, fontSize: 48, fontWeight: 700, letterSpacing: '0.04em', color: '#999999' }}>
           {LETTERS.map((letter, i) => (
             <span
               key={i}
@@ -57,7 +57,7 @@ export const Component = () => {
           width: 300,
           height: 4,
           borderRadius: 9999,
-          background: 'rgba(255, 255, 255, 0.08)',
+          background: 'rgba(150, 150, 150, 0.15)',
           overflow: 'hidden',
         }}>
           <div style={{
@@ -67,7 +67,7 @@ export const Component = () => {
             width: '60%',
             height: '100%',
             borderRadius: 9999,
-            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(150, 150, 150, 0.5), transparent)',
             animation: 'glb-anim 2s ease-in-out infinite',
           }} />
         </div>

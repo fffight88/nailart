@@ -18,8 +18,8 @@ export default function TermsPage() {
       <nav className="flex items-center justify-between px-8 h-16 border-b border-white/[0.06]">
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Image
-            src="/nailart_logo.png"
-            alt="Nailart AI logo"
+            src="/grimbang_logo_dark.png"
+            alt="Grimbang logo"
             width={30}
             height={30}
             className="object-contain"
@@ -43,7 +43,7 @@ export default function TermsPage() {
             <h2 className="text-white/80 text-lg font-semibold mb-3">1. Acceptance of Terms</h2>
             <div className="text-white/40 text-sm leading-relaxed space-y-3">
               <p>
-                By accessing or using NailArt (&quot;the Service&quot;), you agree to be bound by these Terms of Service.
+                By accessing or using Grimbang (&quot;the Service&quot;), you agree to be bound by these Terms of Service.
                 If you do not agree to these terms, please do not use the Service.
               </p>
             </div>
@@ -53,7 +53,7 @@ export default function TermsPage() {
             <h2 className="text-white/80 text-lg font-semibold mb-3">2. Description of Service</h2>
             <div className="text-white/40 text-sm leading-relaxed space-y-3">
               <p>
-                NailArt is an AI-powered thumbnail generation platform designed for content creators.
+                Grimbang is an AI-powered thumbnail generation platform designed for content creators.
                 The Service uses artificial intelligence models to generate images based on user-provided prompts and reference images.
               </p>
             </div>
@@ -76,7 +76,7 @@ export default function TermsPage() {
             <h2 className="text-white/80 text-lg font-semibold mb-3">4. Subscription & Credits</h2>
             <div className="text-white/40 text-sm leading-relaxed space-y-3">
               <p>
-                NailArt offers free and paid subscription plans. Paid plans provide monthly credits that are used to generate thumbnails.
+                Grimbang offers free and paid subscription plans. Paid plans provide monthly credits that are used to generate thumbnails.
               </p>
               <ul className="list-disc pl-5 space-y-1.5">
                 <li>Each image generation consumes 1 credit.</li>
@@ -112,7 +112,7 @@ export default function TermsPage() {
                 including YouTube thumbnails, social media posts, and other content creation activities.
               </p>
               <p>
-                You grant NailArt a limited, non-exclusive license to process your inputs for the purpose of generating thumbnails
+                You grant Grimbang a limited, non-exclusive license to process your inputs for the purpose of generating thumbnails
                 and improving the Service.
               </p>
             </div>
@@ -153,7 +153,7 @@ export default function TermsPage() {
             <div className="text-white/40 text-sm leading-relaxed space-y-3">
               <p>
                 The Service is provided &quot;as is&quot; without warranties of any kind, express or implied.
-                NailArt shall not be liable for any indirect, incidental, special, or consequential damages
+                Grimbang shall not be liable for any indirect, incidental, special, or consequential damages
                 arising from the use or inability to use the Service.
               </p>
               <p>
@@ -179,8 +179,8 @@ export default function TermsPage() {
             <div className="text-white/40 text-sm leading-relaxed">
               <p>
                 If you have any questions about these Terms, please contact us at{' '}
-                <a href="mailto:support@nailart.ai" className="text-white/60 underline underline-offset-2 transition-colors hover:text-white/80">
-                  support@nailart.ai
+                <a href="mailto:support@grimbang.com" className="text-white/60 underline underline-offset-2 transition-colors hover:text-white/80">
+                  support@grimbang.com
                 </a>
               </p>
             </div>

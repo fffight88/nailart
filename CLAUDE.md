@@ -1,8 +1,13 @@
-# NailArt — Project Guide
+# Grimbang (그림방) — Project Guide
+
+## Rebranding
+- Project is transitioning from "NailArt" to **Grimbang (그림방)**
+- Full roadmap: `docs/Grimbang_Project_Roadmap.md` — covers model strategy, pricing, feature phases, and brand identity
+- Slogan: *"Your Sentence, Becomes Art."*
 
 ## Service Overview
 - AI-powered YouTube thumbnail generator
-- Gemini API: `gemini-3-pro-image-preview` (primary, 2K) / `gemini-2.5-flash-image` (fallback with retry)
+- Gemini API: `gemini-3.1-flash-image-preview` (primary, 2K) / `gemini-2.5-flash-image` (fallback with retry)
 - Stack: Next.js 16, React 19, Tailwind v4, Supabase (Auth / DB / Storage)
 
 ## Key Files
@@ -37,3 +42,5 @@
 
 ## Tutorial Reference
 - Video: https://www.youtube.com/watch?v=mhVgh640FUw (resume at **25:57**)
+
+

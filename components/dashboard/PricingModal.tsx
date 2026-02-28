@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { BorderBeam } from '@/components/ui/border-beam'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { createClient } from '@/lib/supabase/client'
+import { useLocale } from '@/lib/i18n'
 
 interface PricingModalProps {
   open: boolean
@@ -20,6 +21,7 @@ const PLAN_RANK: Record<string, number> = { free: 0, pro: 1, ultra: 2 }
 
 export default function PricingModal({ open, onClose }: PricingModalProps) {
   const { user } = useAuth()
+  const { t } = useLocale()
   const supabase = useMemo(() => createClient(), [])
   const backdropRef = useRef<HTMLDivElement>(null)
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
@@ -114,11 +116,10 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
       {confirmPlan ? (
         <div className="relative rounded-2xl bg-[#1e1e1e] p-8 w-full max-w-sm">
           <h2 className="text-white text-lg font-bold text-center mb-2">
-            Upgrade to {confirmPlan === 'ultra' ? 'Ultra' : 'Pro'}?
+            {t.pricing.upgradeConfirm.replace('{plan}', confirmPlan === 'ultra' ? 'Ultra' : 'Pro')}
           </h2>
           <p className="text-white/50 text-sm text-center mb-6">
-            The prorated difference will be charged to your card immediately.
-            You&apos;ll receive 200 bonus credits right away.
+            {t.pricing.upgradeMessage}
           </p>
           <div className="flex gap-3">
             <button
@@ -126,7 +127,7 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
               onClick={() => setConfirmPlan(null)}
               className="flex-1 py-2.5 rounded-lg bg-white/[0.06] text-white/60 text-sm font-medium cursor-pointer transition-colors hover:bg-white/[0.1]"
             >
-              Cancel
+              {t.pricing.cancel}
             </button>
             <button
               type="button"
@@ -137,10 +138,10 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
               {loadingPlan === confirmPlan ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-4 h-4 border-2 border-[#181818]/20 border-t-[#181818]/80 rounded-full animate-spin" />
-                  Upgrading...
+                  {t.pricing.upgrading}
                 </span>
               ) : (
-                'Confirm Upgrade'
+                t.pricing.confirmUpgrade
               )}
             </button>
           </div>
@@ -150,7 +151,7 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t.pricing.close}
             className="absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center text-white/30 cursor-pointer transition-colors hover:text-white/70 hover:bg-white/[0.06]"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -160,7 +161,7 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
           </button>
 
           <h2 className="text-white text-xl font-bold text-center mb-6">
-            Choose your plan
+            {t.pricing.chooseYourPlan}
           </h2>
 
           <div className="grid grid-cols-2 gap-4">
@@ -180,14 +181,14 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
                 >
                   {isCurrent && (
                     <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-white/[0.15] text-white/60 text-[10px] font-semibold uppercase tracking-wider">
-                      Current
+                      {t.pricing.current}
                     </span>
                   )}
                   <p className="text-white/50 text-xs font-semibold uppercase tracking-wider">
                     {p.name}
                   </p>
                   <p className="mt-3 text-white text-3xl font-bold">${p.price}</p>
-                  <p className="mt-2 text-white/40 text-sm">{p.credits} credits</p>
+                  <p className="mt-2 text-white/40 text-sm">{p.credits} {t.pricing.credits}</p>
                   <button
                     type="button"
                     disabled={isCurrent || loadingPlan !== null}
@@ -201,14 +202,14 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
                     {loadingPlan === p.plan ? (
                       <span className="flex items-center justify-center gap-2">
                         <span className="w-4 h-4 border-2 border-[#181818]/20 border-t-[#181818]/80 rounded-full animate-spin" />
-                        Loading...
+                        {t.dashboard.loading}
                       </span>
                     ) : isCurrent ? (
-                      'Current Plan'
+                      t.pricing.currentPlan
                     ) : isDowngrade ? (
-                      'Downgrade'
+                      t.pricing.downgrade
                     ) : (
-                      `Get ${p.name}`
+                      t.pricing.getPlan.replace('{name}', p.name)
                     )}
                   </button>
                 </div>

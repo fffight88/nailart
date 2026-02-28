@@ -1,55 +1,44 @@
 'use client'
 
 import { BorderBeam } from '@/components/ui/border-beam'
+import { useLocale } from '@/lib/i18n'
 
-const PLANS = [
-  {
-    name: 'Pro',
-    price: 20,
-    credits: 100,
-    popular: false,
-    features: [
-      '100 credits per month',
-      'AI thumbnail generation',
-      'Reference image support',
-      'Multi-language text rendering',
-    ],
-  },
-  {
-    name: 'Ultra',
-    price: 45,
-    credits: 300,
-    popular: true,
-    features: [
-      '300 credits per month',
-      'AI thumbnail generation',
-      'Reference image support',
-      'Multi-language text rendering',
-      'Best value per credit',
-    ],
-  },
+const PLANS_STATIC = [
+  { name: 'Pro', price: 20, credits: 100, popular: false, featureKeys: ['creditsPerMonth', 'aiThumbnailGeneration', 'referenceImageSupport', 'multiLanguageTextRendering'] as const },
+  { name: 'Ultra', price: 45, credits: 300, popular: true, featureKeys: ['creditsPerMonth', 'aiThumbnailGeneration', 'referenceImageSupport', 'multiLanguageTextRendering', 'bestValuePerCredit'] as const },
 ]
 
 export default function Pricing() {
+  const { t } = useLocale()
+
+  const plans = PLANS_STATIC.map(p => ({
+    ...p,
+    features: p.featureKeys.map(key =>
+      key === 'creditsPerMonth'
+        ? t.landingPricing.features.creditsPerMonth.replace('{n}', String(p.credits))
+        : t.landingPricing.features[key]
+    ),
+  }))
+
   return (
     <section id="pricing" className="relative py-32 px-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
           <p className="text-sm font-semibold uppercase tracking-widest text-white/40 mb-3">
-            Pricing
+            {t.landingPricing.label}
           </p>
           <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-            Simple, transparent pricing
+            {t.landingPricing.heading}
           </h2>
           <p className="mt-4 text-lg text-white/50 max-w-md mx-auto">
-            Start free, upgrade when you need more power.
+            {t.landingPricing.subheading}
           </p>
         </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {PLANS.map((plan) => (
+          {plans.map((plan) => (
             <div
               key={plan.name}
               className={`relative rounded-2xl p-8 flex flex-col ${
@@ -60,7 +49,7 @@ export default function Pricing() {
             >
               {plan.popular && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-white/[0.12] text-white/80 text-xs font-semibold uppercase tracking-wider border border-white/[0.1]">
-                  Most Popular
+                  {t.landingPricing.mostPopular}
                 </span>
               )}
 
@@ -72,12 +61,12 @@ export default function Pricing() {
               {/* Price */}
               <div className="mt-4 flex items-baseline gap-1">
                 <span className="text-5xl font-bold text-white">${plan.price}</span>
-                <span className="text-white/40 text-sm">/month</span>
+                <span className="text-white/40 text-sm">{t.landingPricing.month}</span>
               </div>
 
               {/* Credits */}
               <p className="mt-2 text-white/40 text-sm">
-                {plan.credits} credits included
+                {plan.credits} {t.landingPricing.creditsIncluded}
               </p>
 
               {/* Divider */}
@@ -110,7 +99,7 @@ export default function Pricing() {
                     : 'bg-white/[0.08] text-white border border-white/[0.1]'
                 }`}
               >
-                Get {plan.name}
+                {t.landingPricing.getPlan.replace('{name}', plan.name)}
               </a>
 
               {/* Border beam for popular plan */}

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Indie_Flower } from "next/font/google";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { LocaleProvider } from "@/lib/i18n";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,8 +22,8 @@ const indieFlower = Indie_Flower({
 });
 
 export const metadata: Metadata = {
-  title: "nailart",
-  description: "Thumbnail Generator",
+  title: "Grimbang",
+  description: "AI YouTube Thumbnail Generator",
 };
 
 export default function RootLayout({
@@ -30,12 +32,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${indieFlower.variable} antialiased`}
       >
         <AuthProvider>
-          {children}
+          <ThemeProvider>
+            <LocaleProvider>
+              {children}
+            </LocaleProvider>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

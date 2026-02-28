@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useLocale } from '@/lib/i18n'
 
 const FRAG = `
 #define MAX_COLORS 8
@@ -104,6 +105,7 @@ function hexToRgb(hex: string): [number, number, number] {
 }
 
 export default function CTA() {
+  const { t } = useLocale()
   const canvasRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -232,16 +234,16 @@ export default function CTA() {
         {/* Content */}
         <div className="relative z-[2] flex flex-col items-center text-center py-20 px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight max-w-lg">
-            Start creating thumbnails that get clicks
+            {t.cta.heading}
           </h2>
           <p className="mt-4 text-white/60 text-lg max-w-md">
-            Join creators who use AI to design scroll-stopping YouTube thumbnails in seconds.
+            {t.cta.subheading}
           </p>
           <a
             href="/auth"
             className="mt-8 inline-flex items-center gap-2 py-3.5 px-8 rounded-xl bg-white text-[#181818] text-sm font-semibold no-underline transition-opacity hover:opacity-90 shadow-[0_8px_32px_rgba(255,255,255,0.1)]"
           >
-            Get Started Free
+            {t.cta.button}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

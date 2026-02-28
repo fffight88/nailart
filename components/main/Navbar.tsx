@@ -1,15 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-
-const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Contact', href: '#contact' },
-]
+import { useLocale } from '@/lib/i18n'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { locale, setLocale, t } = useLocale()
+
+  const NAV_LINKS = [
+    { label: t.nav.features, href: '#features' },
+    { label: t.nav.pricing, href: '#pricing' },
+    { label: t.nav.contact, href: '#contact' },
+  ]
 
   return (
     <nav className="fixed top-0 inset-x-0 z-[100] bg-black/40 backdrop-blur-[12px] backdrop-saturate-[120%] border-b border-white/[0.08] font-sans text-white">
@@ -17,14 +19,14 @@ export default function Navbar() {
         {/* Left: Logo */}
         <a href="/" className="flex items-center gap-2.5 no-underline text-white">
           <img
-            src="/nailart_logo.png"
-            alt="Nailart AI logo"
+            src="/grimbang_logo_dark.png"
+            alt="Grimbang logo"
             width={22}
             height={22}
             className="object-contain"
           />
           <span className="text-lg font-bold tracking-tight">
-            Nailart AI
+            Grimbang
           </span>
         </a>
 
@@ -43,11 +45,23 @@ export default function Navbar() {
 
         {/* Right: CTA + Hamburger */}
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setLocale(locale === 'en' ? 'ko' : 'en')}
+            aria-label="Toggle language"
+            className="w-9 h-9 rounded-lg flex items-center justify-center text-white/50 cursor-pointer transition-colors hover:text-white hover:bg-white/[0.06]"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+          </button>
           <a
             href="/auth"
             className="py-2 px-5 rounded-[10px] bg-white/12 text-white no-underline text-sm font-semibold border border-white/18 backdrop-blur-sm transition-colors duration-200 hover:bg-white/20"
           >
-            Get Started
+            {t.nav.getStarted}
           </a>
 
           {/* Hamburger - mobile only */}

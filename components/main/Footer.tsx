@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useLocale } from '@/lib/i18n'
 
 const SOCIAL_LINKS = [
   {
@@ -30,14 +33,16 @@ const SOCIAL_LINKS = [
   },
 ]
 
-const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Privacy', href: '/privacy' },
-  { label: 'Terms', href: '/terms' },
-]
-
 export default function Footer() {
+  const { t } = useLocale()
+
+  const navLinks = [
+    { label: t.footer.features, href: '#features' },
+    { label: t.footer.pricing, href: '#pricing' },
+    { label: t.footer.privacy, href: '/privacy' },
+    { label: t.footer.terms, href: '/terms' },
+  ]
+
   return (
     <footer className="px-6 pb-8 pt-16">
       <div className="max-w-6xl mx-auto rounded-2xl bg-white/[0.03] border border-white/[0.08] px-8 py-6">
@@ -47,14 +52,14 @@ export default function Footer() {
             {/* Logo */}
             <a href="/" className="flex items-center gap-2.5 no-underline text-white">
               <img
-                src="/nailart_logo.png"
-                alt="Nailart AI logo"
+                src="/grimbang_logo_dark.png"
+                alt="Grimbang logo"
                 width={20}
                 height={20}
                 className="object-contain"
               />
               <span className="text-sm font-bold tracking-tight text-white/80">
-                Nailart AI
+                Grimbang
               </span>
             </a>
 
@@ -80,7 +85,7 @@ export default function Footer() {
 
           {/* Right: Nav links */}
           <nav className="flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
@@ -95,7 +100,7 @@ export default function Footer() {
         {/* Bottom copyright */}
         <div className="mt-6 pt-4 border-t border-white/[0.06] text-center">
           <p className="text-white/20 text-xs">
-            &copy; {new Date().getFullYear()} Nailart AI. All rights reserved.
+            &copy; {new Date().getFullYear()} Grimbang. {t.footer.allRightsReserved}
           </p>
         </div>
       </div>
