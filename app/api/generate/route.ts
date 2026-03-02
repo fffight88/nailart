@@ -4,9 +4,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { genai } from '@/lib/gemini'
 import { THUMBNAIL_SYSTEM_PROMPT } from '@/lib/system-prompt'
 
-export const maxDuration = 60
+export const maxDuration = 300
 
-const GEMINI_TIMEOUT_MS = 60_000 // 60 seconds per attempt
+const GEMINI_TIMEOUT_MS = 120_000 // 120 seconds per attempt
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   return Promise.race([
@@ -34,6 +34,7 @@ export async function POST(request: Request) {
 
     const body = await request.json()
     const prompt = body.prompt?.trim()
+    const generationPrompt = body.generationPrompt?.trim() || prompt
 
     if (!prompt) {
       return NextResponse.json(
@@ -42,9 +43,9 @@ export async function POST(request: Request) {
       )
     }
 
-    if (prompt.length > 1000) {
+    if ((generationPrompt || prompt).length > 2000) {
       return NextResponse.json(
-        { error: 'Prompt must be under 1000 characters' },
+        { error: 'Prompt must be under 2000 characters' },
         { status: 400 }
       )
     }
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
         console.log(`Trying ${model.id} (attempt ${i + 1}/${MODELS.length})`)
         // Build contents: text prompt + optional image parts
         const contentParts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[] = [
-          { text: `${THUMBNAIL_SYSTEM_PROMPT} ${prompt}` },
+          { text: `${THUMBNAIL_SYSTEM_PROMPT} ${generationPrompt}` },
           ...images.map((img) => ({
             inlineData: { mimeType: img.mimeType, data: img.data },
           })),

@@ -133,6 +133,15 @@ export const ko: Translations = {
     removeAttachment: '첨부 제거',
   },
 
+  preset: {
+    label: '필요하면 스타일을 골라보세요:',
+    viralImpact: '조회수 폭발형',
+    epicStory: '대작 스토리형',
+    kWebtoonPop: '웹툰 감성형',
+    techFuture: '전문가 테크형',
+    versusBattle: '비교/대결형',
+  },
+
   sidebar: {
     myThumbnails: '내 썸네일',
     noThumbnails: '아직 썸네일이 없습니다',

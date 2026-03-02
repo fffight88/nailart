@@ -9,6 +9,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/components/providers/AuthProvider'
 import { useLocale } from '@/lib/i18n'
 import type { Thumbnail } from '@/lib/types'
+import { PRESETS, applyPreset } from '@/lib/presets'
+import PresetSelector from './PresetSelector'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const MAX_ATTACHMENTS = 10
@@ -36,6 +38,7 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
   const [error, setError] = useState<string | null>(null)
   const [attachments, setAttachments] = useState<Attachment[]>([])
   const [existingThumbnails, setExistingThumbnails] = useState<Thumbnail[]>([])
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null)
   const [showExistingPopover, setShowExistingPopover] = useState(false)
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -222,6 +225,13 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
           }
         }
 
+        // Combine user prompt with preset if selected
+        const userPrompt = value.trim()
+        const selectedPreset = PRESETS.find((p) => p.id === selectedPresetId)
+        const finalPrompt = selectedPreset
+          ? applyPreset(selectedPreset.template, userPrompt)
+          : userPrompt
+
         const controller = new AbortController()
         const timeoutId = setTimeout(() => controller.abort(), 200_000)
 
@@ -229,7 +239,8 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            prompt: value.trim(),
+            prompt: userPrompt,
+            ...(selectedPreset && { generationPrompt: finalPrompt }),
             ...(images.length > 0 && { images }),
           }),
           signal: controller.signal,
@@ -250,6 +261,7 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
         setResult(data.thumbnail)
         setValue('')
         setAttachments([])
+        setSelectedPresetId(null)
         if (textareaRef.current) {
           textareaRef.current.style.height = 'auto'
         }
@@ -263,7 +275,7 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
         setIsGenerating(false)
       }
     },
-    [value, isGenerating, attachments, t, onOpenPricing]
+    [value, isGenerating, attachments, selectedPresetId, t, onOpenPricing]
   )
 
   const handleRetry = useCallback(() => {
@@ -535,6 +547,13 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
           className="from-transparent via-[#C0C0C0] to-transparent"
         />
       </form>
+
+      {/* Preset selector */}
+      <PresetSelector
+        selectedPresetId={selectedPresetId}
+        onSelect={setSelectedPresetId}
+        disabled={isGenerating}
+      />
 
       <p className="mt-4 text-foreground/30 text-sm">
         {t.prompt.helper}

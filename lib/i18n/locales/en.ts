@@ -140,6 +140,16 @@ export const en = {
     removeAttachment: 'Remove attachment',
   },
 
+  // Preset selector
+  preset: {
+    label: 'Choose a style if you need:',
+    viralImpact: 'Viral Impact',
+    epicStory: 'Epic Story',
+    kWebtoonPop: 'K-Webtoon Pop',
+    techFuture: 'Tech Future',
+    versusBattle: 'Versus Battle',
+  },
+
   // Sidebar
   sidebar: {
     myThumbnails: 'My Thumbnails',
