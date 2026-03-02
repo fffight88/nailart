@@ -18,7 +18,7 @@ export default function TermsPage() {
       <nav className="flex items-center justify-between px-8 h-16 border-b border-white/[0.06]">
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Image
-            src="/grimbang_logo_dark.png"
+            src="/grimbang_logo_dark.webp"
             alt="Grimbang logo"
             width={30}
             height={30}

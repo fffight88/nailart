@@ -51,7 +51,7 @@ export default function AuthPage() {
             {/* Logo */}
             <div className="flex-1 flex items-center justify-center">
               <img
-                src="/grimbang_logo_dark.png"
+                src="/grimbang_logo_dark.webp"
                 alt="Grimbang logo"
                 className="max-w-[640px] w-full object-contain"
               />

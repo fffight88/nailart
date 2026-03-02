@@ -19,7 +19,7 @@ export default function Navbar() {
         {/* Left: Logo */}
         <a href="/" className="flex items-center gap-2.5 no-underline text-white">
           <img
-            src="/grimbang_logo_dark.png"
+            src="/grimbang_logo_dark.webp"
             alt="Grimbang logo"
             width={22}
             height={22}

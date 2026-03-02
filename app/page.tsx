@@ -10,11 +10,11 @@ import Footer from '@/components/main/Footer';
 import { useLocale } from '@/lib/i18n';
 
 const HERO_IMAGES = [
-  { id: '1', src: '/main/1.png', alt: 'Thumbnail example 1', rotation: -8 },
-  { id: '2', src: '/main/2.png', alt: 'Thumbnail example 2', rotation: 5 },
-  { id: '3', src: '/main/3.png', alt: 'Thumbnail example 3', rotation: -3 },
-  { id: '4', src: '/main/4.png', alt: 'Thumbnail example 4', rotation: 7 },
-  { id: '5', src: '/main/5.png', alt: 'Thumbnail example 5', rotation: -5 },
+  { id: '1', src: '/main/1.webp', alt: 'Thumbnail example 1', rotation: -8 },
+  { id: '2', src: '/main/2.webp', alt: 'Thumbnail example 2', rotation: 5 },
+  { id: '3', src: '/main/3.webp', alt: 'Thumbnail example 3', rotation: -3 },
+  { id: '4', src: '/main/4.webp', alt: 'Thumbnail example 4', rotation: 7 },
+  { id: '5', src: '/main/5.webp', alt: 'Thumbnail example 5', rotation: -5 },
 ];
 
 export default function Home() {

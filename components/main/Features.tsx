@@ -4,11 +4,11 @@ import Image from 'next/image'
 import { useLocale } from '@/lib/i18n'
 
 const FEATURE_STATIC = [
-  { image: '/main/1.png', span: 'md:col-span-2 md:row-span-2', imageClass: 'aspect-[16/10]' },
-  { image: '/main/2.png', span: '', imageClass: 'aspect-[4/3]' },
-  { image: '/main/3.png', span: '', imageClass: 'aspect-[4/3]' },
-  { image: '/main/4.png', span: 'md:col-span-2', imageClass: 'aspect-[21/9]' },
-  { image: '/main/5.png', span: '', imageClass: 'aspect-[4/3]' },
+  { image: '/main/1.webp', span: 'md:col-span-2 md:row-span-2', imageClass: 'aspect-[16/10]' },
+  { image: '/main/2.webp', span: '', imageClass: 'aspect-[4/3]' },
+  { image: '/main/3.webp', span: '', imageClass: 'aspect-[4/3]' },
+  { image: '/main/4.webp', span: 'md:col-span-2', imageClass: 'aspect-[21/9]' },
+  { image: '/main/5.webp', span: '', imageClass: 'aspect-[4/3]' },
 ] as const
 
 export default function Features() {

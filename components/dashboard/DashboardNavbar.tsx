@@ -99,7 +99,7 @@ export default function DashboardNavbar({ onToggleSidebar, onOpenPricing }: Dash
           className="transition-opacity duration-200 hover:opacity-80"
         >
           <Image
-            src={theme === 'dark' ? '/grimbang_logo_dark.png' : '/grimbang_logo.png'}
+            src={theme === 'dark' ? '/grimbang_logo_dark.webp' : '/grimbang_logo.webp'}
             alt="Grimbang logo"
             width={34}
             height={34}
