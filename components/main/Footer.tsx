@@ -59,7 +59,7 @@ export default function Footer() {
                 className="object-contain"
               />
               <span className="text-sm font-bold tracking-tight text-white/80">
-                Grimbang
+                GRIMBANG
               </span>
             </a>
 

@@ -47,13 +47,13 @@ export default function AuthPage() {
       <AetherHero maxWidth={99999}>
         <div className="flex flex-col md:flex-row w-full h-[calc(100vh-128px)]">
           {/* Left (desktop) / Top (mobile): branding */}
-          <div className="hidden md:flex w-3/5 bg-black/60 backdrop-blur-sm rounded-2xl flex-col justify-between p-10 mr-6 overflow-hidden">
+          <div className="hidden md:flex w-3/5 bg-black/60 backdrop-blur-sm rounded-2xl flex-col justify-between p-6 mr-6 overflow-hidden">
             {/* Logo */}
             <div className="flex-1 flex items-center justify-center">
               <img
                 src="/grimbang_logo_dark.webp"
                 alt="Grimbang logo"
-                className="max-w-[640px] w-full object-contain"
+                className="w-full h-full object-contain"
               />
             </div>
           </div>

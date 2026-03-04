@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { genai } from '@/lib/gemini'
-import { THUMBNAIL_SYSTEM_PROMPT } from '@/lib/system-prompt'
+import { THUMBNAIL_SYSTEM_PROMPT, IMAGE_ANALYSIS_PROMPT } from '@/lib/system-prompt'
 
 export const maxDuration = 300
 
@@ -104,6 +104,34 @@ export async function POST(request: Request) {
       )
     }
 
+    // Analyze reference images if attached (non-blocking)
+    let analysisResult = ''
+    if (images.length > 0) {
+      try {
+        const analysisResponse = await withTimeout(
+          genai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [
+              { text: IMAGE_ANALYSIS_PROMPT },
+              ...images.map((img) => ({
+                inlineData: { mimeType: img.mimeType, data: img.data },
+              })),
+            ],
+          }),
+          30_000,
+          'Image analysis timed out'
+        )
+        analysisResult =
+          analysisResponse.candidates?.[0]?.content?.parts?.find((p) => p.text)
+            ?.text || ''
+        if (analysisResult) {
+          console.log('Reference image analysis:', analysisResult.slice(0, 200))
+        }
+      } catch (err) {
+        console.error('Image analysis failed (non-blocking):', err)
+      }
+    }
+
     // Call Gemini API: try 3.1-flash twice (with 5s gap), then fallback to 2.5-flash
     const MODELS = [
       { id: 'gemini-3.1-flash-image-preview', imageSize: '2K', delayAfter: 5000 },
@@ -120,7 +148,7 @@ export async function POST(request: Request) {
         console.log(`Trying ${model.id} (attempt ${i + 1}/${MODELS.length})`)
         // Build contents: text prompt + optional image parts
         const contentParts: ({ text: string } | { inlineData: { mimeType: string; data: string } })[] = [
-          { text: `${THUMBNAIL_SYSTEM_PROMPT} ${generationPrompt}` },
+          { text: `${THUMBNAIL_SYSTEM_PROMPT} ${analysisResult ? `[Reference Analysis: ${analysisResult}] ` : ''}${generationPrompt}` },
           ...images.map((img) => ({
             inlineData: { mimeType: img.mimeType, data: img.data },
           })),

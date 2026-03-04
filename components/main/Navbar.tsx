@@ -26,7 +26,7 @@ export default function Navbar() {
             className="object-contain"
           />
           <span className="text-lg font-bold tracking-tight">
-            Grimbang
+            GRIMBANG
           </span>
         </a>
 

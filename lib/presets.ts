@@ -9,31 +9,31 @@ export const PRESETS: Preset[] = [
     id: 'viral-impact',
     icon: '/viral-impact.png',
     template:
-      'Hyper-realistic close-up of [USER_PROMPT], featuring an exaggerated shocked facial expression with wide eyes and open mouth, vibrant saturated colors with intense orange and blue contrast, neon rim lighting, high-impact studio quality, extreme detail.',
+      'Hyper-realistic close-up of [USER_PROMPT], extreme shocked facial expression with wide eyes and crystal-clear iris detail, 50% exaggerated reaction, vibrant saturated colors, intense neon rim lighting to separate subject from background, background with beautiful circular bokeh, high-impact studio quality.',
   },
   {
     id: 'epic-story',
     icon: '/epic-story.png',
     template:
-      'Cinematic digital illustration of [USER_PROMPT], dramatic low-angle shot to create a sense of scale, golden hour volumetric lighting with dust particles, epic atmospheric haze, high depth of field with blurred background, professional movie poster aesthetic.',
+      'Cinematic wide-angle shot of [USER_PROMPT], featuring a tiny silhouette against a massive and overwhelming environment, dramatic rule-of-thirds composition, golden hour volumetric lighting with visible light shafts, atmospheric haze, professional movie poster aesthetic, deep depth of field.',
   },
   {
     id: 'k-webtoon-pop',
     icon: '/k-webtoon-pop.png',
     template:
-      'Trendy Korean webtoon style illustration of [USER_PROMPT], bold clean outlines, vibrant and bright color palette, expressive character reaction, soft cel-shading, high-energy composition, clean and polished 2D aesthetic.',
+      'Trendy Korean webtoon style of [USER_PROMPT], dynamic speed lines and expressive stylized shock symbols around the character, bold clean outlines, high-saturation cel shading, bright and energetic color palette, polished 2D digital art with variety show energy.',
   },
   {
     id: 'tech-future',
     icon: '/tech-future.png',
     template:
-      'Sleek 3D octane render of [USER_PROMPT], cyberpunk neon aesthetic with electric blue and magenta accents, sharp textures and metallic reflections, futuristic studio lighting, centered and powerful composition, high-tech professional vibe.',
+      'Premium 3D octane render of [USER_PROMPT], minimalist cyberpunk aesthetic, matte metallic textures and sharp reflections, soft-box studio lighting with elegant shadows, macro lens focus on fine details, clean monochromatic background with a single neon accent color, futuristic professional vibe.',
   },
   {
     id: 'versus-battle',
     icon: '/versus-battle.png',
     template:
-      'Split-screen comparison layout featuring [USER_PROMPT], dynamic Level 1 vs Level 100 visual storytelling, high-contrast lighting differences between both sides, dramatic textures, clean vertical transition, ultra-sharp 2K resolution.',
+      'Aggressive split-screen layout of [USER_PROMPT], sharp lightning bolt divider between two sides, extreme lighting contrast (Mundane vs Extraordinary), \'Level 1 vs Level 100\' visual storytelling, high-contrast textures, ultra-sharp 4K resolution, compelling curiosity gap design.',
   },
 ]
 
