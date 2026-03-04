@@ -3,7 +3,11 @@
 import { useState } from 'react'
 import { useLocale } from '@/lib/i18n'
 
-export default function Navbar() {
+interface NavbarProps {
+  onLoginClick?: () => void
+}
+
+export default function Navbar({ onLoginClick }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { locale, setLocale, t } = useLocale()
 
@@ -57,12 +61,13 @@ export default function Navbar() {
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
           </button>
-          <a
-            href="/auth"
-            className="py-2 px-5 rounded-[10px] bg-white/12 text-white no-underline text-sm font-semibold border border-white/18 backdrop-blur-sm transition-colors duration-200 hover:bg-white/20"
+          <button
+            type="button"
+            onClick={onLoginClick}
+            className="py-2 px-5 rounded-[10px] bg-white/12 text-white text-sm font-semibold border border-white/18 backdrop-blur-sm cursor-pointer transition-colors duration-200 hover:bg-white/20"
           >
             {t.nav.getStarted}
-          </a>
+          </button>
 
           {/* Hamburger - mobile only */}
           <button

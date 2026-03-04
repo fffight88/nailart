@@ -16,7 +16,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace('/auth')
+      router.replace('/?login=true')
     }
   }, [loading, user, router])
 

@@ -33,6 +33,25 @@
 ## 기술 스택
 - Next.js 16, React 19, Tailwind v4, Supabase (Auth/DB/Storage), Google Gemini API (@google/genai)
 
+### 7. 로그인 모달 전환
+- `/auth` 별도 페이지 → 랜딩페이지 글래스모피즘 로그인 모달로 전환
+- `components/main/LoginModal.tsx` — createPortal, Escape/배경클릭 닫기, Google OAuth
+- Navbar/Hero/CTA/Pricing 모든 로그인 버튼 → 모달 오픈으로 변경
+- `/auth` 접속 시 `/?login=true`로 리다이렉트 (북마크 호환)
+- 대시보드 미인증 시 `/?login=true`로 리다이렉트
+
+### 8. 이미지 첨부/다운로드 버그 수정
+- 기존 썸네일 첨부 시 400 에러 → `compressImageBlob()` 추가 (OffscreenCanvas로 1024px 리사이즈 + JPEG 85%)
+- 다운로드 버튼 cross-origin 이슈 → fetch → blob → objectURL 방식으로 수정
+- 생성 성공 시 기존 썸네일 팝오버 목록 즉시 갱신
+
 ## 다음 작업
-- 튜토리얼 영상 이어보기: https://www.youtube.com/watch?v=mhVgh640FUw&list=PLKL3Ar7lG1Dg-5RAqcSDbYP00Vfz5sGI1&index=28
-  - **25분 57초**부터 이어서 볼 차례
+
+### Phase 2: 정밀 인페인팅 (fal.ai FLUX Fill Dev)
+- `@fal-ai/client` 패키지 설치
+- `/api/inpaint/route.ts` 라우트 추가
+- Canvas 마스크 그리기 UI 구현
+- DB: `thumbnails.parent_id` 컬럼 추가
+- 정밀 수정 애드온 결제 연동
+
+### 참고

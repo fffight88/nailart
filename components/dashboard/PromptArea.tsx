@@ -14,6 +14,36 @@ import PresetSelector from './PresetSelector'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const MAX_ATTACHMENTS = 10
+const REF_IMAGE_MAX_DIM = 1024 // max width/height for reference images sent to API
+
+/** Resize an image blob to fit within maxDim, return { data: base64, mimeType } */
+async function compressImageBlob(
+  blob: Blob,
+  maxDim: number
+): Promise<{ data: string; mimeType: string }> {
+  const bitmap = await createImageBitmap(blob)
+  const { width, height } = bitmap
+
+  let targetW = width
+  let targetH = height
+  if (width > maxDim || height > maxDim) {
+    const scale = maxDim / Math.max(width, height)
+    targetW = Math.round(width * scale)
+    targetH = Math.round(height * scale)
+  }
+
+  const canvas = new OffscreenCanvas(targetW, targetH)
+  const ctx = canvas.getContext('2d')!
+  ctx.drawImage(bitmap, 0, 0, targetW, targetH)
+  bitmap.close()
+
+  const outBlob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.85 })
+  const buffer = await outBlob.arrayBuffer()
+  const base64 = btoa(
+    new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), '')
+  )
+  return { data: base64, mimeType: 'image/jpeg' }
+}
 
 interface Attachment {
   id: string
@@ -202,27 +232,14 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
       setResult(null)
 
       try {
-        // Build request body
+        // Build request body — compress all images to fit API limits
         const images: { data: string; mimeType: string }[] = []
 
         for (const att of attachments) {
-          if (att.file) {
-            // Local file → base64
-            const buffer = await att.file.arrayBuffer()
-            const base64 = btoa(
-              new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), '')
-            )
-            images.push({ data: base64, mimeType: att.file.type })
-          } else {
-            // Existing thumbnail URL → fetch and convert
-            const res = await fetch(att.url)
-            const blob = await res.blob()
-            const buffer = await blob.arrayBuffer()
-            const base64 = btoa(
-              new Uint8Array(buffer).reduce((s, b) => s + String.fromCharCode(b), '')
-            )
-            images.push({ data: base64, mimeType: blob.type || 'image/png' })
-          }
+          const blob = att.file
+            ? att.file
+            : await fetch(att.url).then((r) => r.blob())
+          images.push(await compressImageBlob(blob, REF_IMAGE_MAX_DIM))
         }
 
         // Combine user prompt with preset if selected
@@ -259,6 +276,7 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
         }
 
         setResult(data.thumbnail)
+        setExistingThumbnails((prev) => [data.thumbnail, ...prev])
         setValue('')
         setAttachments([])
         setSelectedPresetId(null)
@@ -318,15 +336,22 @@ export default function PromptArea({ onOpenPricing }: PromptAreaProps) {
             <div className="p-4">
               <p className="text-foreground/50 text-sm truncate">{result.prompt}</p>
               <div className="flex items-center gap-3 mt-3">
-                <a
-                  href={result.image_url!}
-                  download={`thumbnail-${result.id}.png`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-lg bg-foreground/10 text-foreground text-sm font-medium hover:bg-foreground/15 transition-colors"
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const res = await fetch(result.image_url!)
+                    const blob = await res.blob()
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `thumbnail-${result.id}.png`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }}
+                  className="px-4 py-2 rounded-lg bg-foreground/10 text-foreground text-sm font-medium cursor-pointer hover:bg-foreground/15 transition-colors"
                 >
                   {t.prompt.download}
-                </a>
+                </button>
               </div>
             </div>
           </div>

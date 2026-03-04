@@ -8,6 +8,7 @@
 ## Service Overview
 - AI-powered YouTube thumbnail generator
 - Gemini API: `gemini-3.1-flash-image-preview` (primary, 2K) / `gemini-2.5-flash-image` (fallback with retry)
+- fal.ai API: `FLUX Fill Dev` — Phase 2 마스크 기반 정밀 인페인팅 (예정)
 - Stack: Next.js 16, React 19, Tailwind v4, Supabase (Auth / DB / Storage)
 
 ## Key Files
@@ -40,7 +41,10 @@
 - Glassmorphism style: `bg-white/[0.03-0.06]`, `border-white/[0.06-0.1]`, `backdrop-blur-xl`
 - Dashboard background: `#181818`, sidebar: `#202020`
 
-## Tutorial Reference
-- Video: https://www.youtube.com/watch?v=mhVgh640FUw (resume at **25:57**)
-
+## Inpainting Strategy (Phase 2)
+- **기본 수정** (플랜 포함): Gemini `generateContent`로 원본+프롬프트 전체 재생성
+- **정밀 수정** (애드온 $5~10/월): fal.ai FLUX Fill Dev — 마스크 영역만 수정, 나머지 보존
+- SDK: `@fal-ai/client` (Next.js 공식 지원)
+- API 라우트: `/api/inpaint/route.ts` (예정)
+- 대안 검토 완료: Imagen API (Preview 상태, Vertex AI 필요 → 보류), FLUX Fill Pro (비용 2배 → 필요 시 전환)
 

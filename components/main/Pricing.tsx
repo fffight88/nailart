@@ -8,7 +8,11 @@ const PLANS_STATIC = [
   { name: 'Ultra', price: 45, credits: 300, popular: true, featureKeys: ['creditsPerMonth', 'aiThumbnailGeneration', 'referenceImageSupport', 'multiLanguageTextRendering', 'bestValuePerCredit'] as const },
 ]
 
-export default function Pricing() {
+interface PricingProps {
+  onLoginClick?: () => void
+}
+
+export default function Pricing({ onLoginClick }: PricingProps) {
   const { t } = useLocale()
 
   const plans = PLANS_STATIC.map(p => ({
@@ -91,16 +95,17 @@ export default function Pricing() {
               </ul>
 
               {/* CTA */}
-              <a
-                href="/auth"
-                className={`mt-8 block text-center py-3 rounded-xl text-sm font-semibold no-underline transition-opacity hover:opacity-90 ${
+              <button
+                type="button"
+                onClick={onLoginClick}
+                className={`mt-8 w-full block text-center py-3 rounded-xl text-sm font-semibold cursor-pointer transition-opacity hover:opacity-90 ${
                   plan.popular
                     ? 'bg-white text-[#181818]'
                     : 'bg-white/[0.08] text-white border border-white/[0.1]'
                 }`}
               >
                 {t.landingPricing.getPlan.replace('{name}', plan.name)}
-              </a>
+              </button>
 
               {/* Border beam for popular plan */}
               {plan.popular && (
