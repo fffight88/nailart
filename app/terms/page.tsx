@@ -179,8 +179,8 @@ export default function TermsPage() {
             <div className="text-white/40 text-sm leading-relaxed">
               <p>
                 If you have any questions about these Terms, please contact us at{' '}
-                <a href="mailto:support@grimbang.com" className="text-white/60 underline underline-offset-2 transition-colors hover:text-white/80">
-                  support@grimbang.com
+                <a href="mailto:fffight88@gmail.com" className="text-white/60 underline underline-offset-2 transition-colors hover:text-white/80">
+                  fffight88@gmail.com
                 </a>
               </p>
             </div>
