@@ -100,7 +100,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         .eq('user_id', user!.id)
         .eq('status', 'completed')
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(100)
 
       if (!cancelled && !error && data) {
         setThumbnails(data as Thumbnail[])
@@ -113,8 +113,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   }, [user, supabase])
 
   const handleDelete = async (id: string) => {
+    const target = thumbnails.find((t) => t.id === id)
     // Optimistically remove from UI
     setThumbnails((prev) => prev.filter((t) => t.id !== id))
+
+    // Delete storage file if path exists
+    if (target?.storage_path) {
+      await supabase.storage.from('thumbnails').remove([target.storage_path])
+    }
 
     const { error } = await supabase
       .from('thumbnails')
@@ -130,7 +136,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         .eq('user_id', user!.id)
         .eq('status', 'completed')
         .order('created_at', { ascending: false })
-        .limit(50)
+        .limit(100)
       if (data) setThumbnails(data as Thumbnail[])
     }
   }
@@ -200,7 +206,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   .eq('user_id', user!.id)
                   .eq('status', 'completed')
                   .order('created_at', { ascending: false })
-                  .limit(50)
+                  .limit(100)
                 if (data) setThumbnails(data as Thumbnail[])
                 setLoading(false)
               }}
